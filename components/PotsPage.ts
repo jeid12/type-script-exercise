@@ -35,7 +35,7 @@ export function renderPotsPage(onAddClick: () => void): void {
   const html = `
     <div class="space-y-6">
       <div class="flex items-center justify-end">
-        <button id="add-pot-btn" class="rounded-xl bg-[#1d1d2b] px-6 py-3 text-white font-semibold hover:bg-[#2a2a3d]">
+        <button id="add-pot-btn" class="rounded-xl bg-[#201f24] px-6 py-3 text-white font-semibold hover:bg-[#2d2c31]">
           +Add New Pot
         </button>
       </div>
@@ -86,8 +86,8 @@ export function renderPotsPage(onAddClick: () => void): void {
         </div>
 
         <div class="grid grid-cols-2 gap-3">
-          <button class="add-money-btn rounded-xl bg-[#f4f1f1] py-3 font-semibold text-[#2d2f3b] hover:bg-[#ebe5e5]" data-pot-id="${pot.id}">+ Add Money</button>
-          <button class="withdraw-btn rounded-xl bg-[#f4f1f1] py-3 font-semibold text-[#2d2f3b] hover:bg-[#ebe5e5]" data-pot-id="${pot.id}">Withdraw</button>
+          <button class="add-money-btn rounded-xl bg-[#f8f4f0] py-3 font-semibold text-[#2d2f3b] hover:bg-[#ebe5e5]" data-pot-id="${pot.id}">+ Add Money</button>
+          <button class="withdraw-btn rounded-xl bg-[#f8f4f0] py-3 font-semibold text-[#2d2f3b] hover:bg-[#ebe5e5]" data-pot-id="${pot.id}">Withdraw</button>
         </div>
       `,
     });
@@ -135,7 +135,7 @@ export function showAddPotForm(onAdd: (name: string, target: number, theme: stri
             </select>
           </div>
 
-          <button type="submit" class="mt-2 h-12 w-full rounded-lg bg-[#1d1d2b] text-lg font-semibold text-white hover:bg-[#2a2a3d]">
+          <button type="submit" class="mt-2 h-12 w-full rounded-lg bg-[#201f24] text-lg font-semibold text-white hover:bg-[#2d2c31]">
             Submit
           </button>
         </form>
@@ -184,7 +184,7 @@ export function showAddMoneyForm(
             <input name="amount" type="number" step="0.01" min="0" max="${Math.max(0, target - currentSaved)}" class="h-12 w-full rounded-lg border border-[#cfd4dc] px-4 text-[25px] leading-none text-[#1f2131] focus:outline-none" required>
           </div>
 
-          <button type="submit" class="mt-2 h-12 w-full rounded-lg bg-[#1d1d2b] text-lg font-semibold text-white hover:bg-[#2a2a3d]">
+          <button type="submit" class="mt-2 h-12 w-full rounded-lg bg-[#201f24] text-lg font-semibold text-white hover:bg-[#2d2c31]">
             Submit
           </button>
         </form>
@@ -232,7 +232,7 @@ export function showWithdrawForm(
             <input name="amount" type="number" step="0.01" min="0" max="${Math.max(0, currentSaved)}" class="h-12 w-full rounded-lg border border-[#cfd4dc] px-4 text-[25px] leading-none text-[#1f2131] focus:outline-none" required>
           </div>
 
-          <button type="submit" class="mt-2 h-12 w-full rounded-lg bg-[#1d1d2b] text-lg font-semibold text-white hover:bg-[#2a2a3d]">
+          <button type="submit" class="mt-2 h-12 w-full rounded-lg bg-[#201f24] text-lg font-semibold text-white hover:bg-[#2d2c31]">
             Submit
           </button>
         </form>

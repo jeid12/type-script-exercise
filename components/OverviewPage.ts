@@ -80,7 +80,7 @@ export function renderOverviewPage(): void {
   const html = `
     <div class="space-y-4">
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div class="bg-[#1d1d2b] text-white rounded-xl p-4">
+        <div class="bg-[#201f24] text-white rounded-xl p-4">
           <p class="text-xs text-slate-300 mb-2">Current Balance</p>
           <p class="text-[46px] leading-none font-bold">${utils.formatCurrency(summary.balance)}</p>
         </div>

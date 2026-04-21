@@ -163,3 +163,31 @@ export function calculatePercentage(current: number, total: number): number {
   if (total === 0) return 0;
   return Math.round((current / total) * 100);
 }
+
+export function showSuccessMessage(message: string, durationMs = 200): void {
+  if (typeof window === 'undefined' || typeof document === 'undefined') {
+    return;
+  }
+
+  const containerId = 'global-success-toast-container';
+  let container = document.getElementById(containerId);
+
+  if (!container) {
+    container = document.createElement('div');
+    container.id = containerId;
+    container.className = 'fixed bottom-4 right-4 z-[9999] flex flex-col gap-2 pointer-events-none';
+    document.body.appendChild(container);
+  }
+
+  const toast = document.createElement('div');
+  toast.className = 'pointer-events-auto rounded-lg bg-[#201f24] px-4 py-3 text-sm font-semibold text-white shadow-lg border border-[#35343a]';
+  toast.textContent = message;
+  container.appendChild(toast);
+
+  window.setTimeout(() => {
+    toast.remove();
+    if (container && container.childElementCount === 0) {
+      container.remove();
+    }
+  }, durationMs);
+}

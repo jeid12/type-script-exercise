@@ -114,7 +114,7 @@ export function renderBudgetsPage(onAddClick: () => void): void {
   const html = `
     <div class="space-y-6">
       <div class="flex justify-end">
-        <button id="add-budget-btn" class="rounded-xl bg-[#1d1d2b] px-6 py-3 text-white font-semibold hover:bg-[#2a2a3d]">
+        <button id="add-budget-btn" class="rounded-xl bg-[#201f24] px-6 py-3 text-white font-semibold hover:bg-[#2d2c31]">
           +Add New Budget
         </button>
       </div>
@@ -278,7 +278,7 @@ export function showAddBudgetForm(onAdd: (category: string, maxSpend: number, th
             </select>
           </div>
 
-          <button type="submit" class="mt-2 h-12 w-full rounded-lg bg-[#1d1d2b] text-lg font-semibold text-white hover:bg-[#2a2a3d]">
+          <button type="submit" class="mt-2 h-12 w-full rounded-lg bg-[#201f24] text-lg font-semibold text-white hover:bg-[#2d2c31]">
             Submit
           </button>
         </form>

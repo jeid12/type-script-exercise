@@ -19,7 +19,7 @@ export function renderRecurringBillsPage(): void {
   const html = `
     <div class="grid grid-cols-1 xl:grid-cols-[340px_1fr] gap-4">
       <section class="space-y-4">
-        <article class="rounded-xl bg-[#1d1d2b] p-6 text-white">
+        <article class="rounded-xl bg-[#201f24] p-6 text-white">
           <p class="text-sm text-slate-300 mb-3">Total bills</p>
           <p class="text-[51px] leading-none font-bold">${utils.formatCurrency(summary.paid + summary.upcoming + summary.due)}</p>
         </article>
@@ -80,13 +80,13 @@ export function renderRecurringBillsPage(): void {
         </div>
 
         <div class="mt-6 flex items-center justify-between">
-          <button id="bills-prev" class="rounded-xl bg-[#f4f1f1] px-5 py-3 text-[#8f8f9b] font-semibold disabled:opacity-40">
+          <button id="bills-prev" class="rounded-xl bg-[#f8f4f0] px-5 py-3 text-[#8f8f9b] font-semibold disabled:opacity-40">
             ◀ Prev
           </button>
 
-          <div id="bills-page-indicator" class="h-10 min-w-10 rounded-lg bg-[#1d1d2b] px-3 flex items-center justify-center text-white font-semibold">1</div>
+          <div id="bills-page-indicator" class="h-10 min-w-10 rounded-lg bg-[#201f24] px-3 flex items-center justify-center text-white font-semibold">1</div>
 
-          <button id="bills-next" class="rounded-xl bg-[#f4f1f1] px-5 py-3 text-[#8f8f9b] font-semibold disabled:opacity-40">
+          <button id="bills-next" class="rounded-xl bg-[#f8f4f0] px-5 py-3 text-[#8f8f9b] font-semibold disabled:opacity-40">
             Next ▶
           </button>
         </div>

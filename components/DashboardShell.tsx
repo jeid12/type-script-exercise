@@ -70,56 +70,52 @@ export default function DashboardShell({ children }: Props) {
   }
 
   return (
-    <div className="min-h-screen bg-[#f4f1f1] text-slate-900 flex">
-      <aside className={`bg-[#1d1d2b] text-slate-100 transition-all duration-300 ${collapsed ? 'w-[58px]' : 'w-60'} p-3 md:p-4 flex flex-col`}>
-        <div className={`mb-8 ${collapsed ? 'mt-1' : 'mt-2'}`}>
-          <h1 className={`font-bold tracking-tight ${collapsed ? 'text-4xl text-center' : 'text-4xl px-2'}`}>
-            {collapsed ? 'f' : 'finance'}
+    <div className="min-h-screen bg-[#f8f4f0] text-[#201f24] flex">
+      <aside className={`bg-[#201f24] text-[#b3b3b3] transition-all duration-300 ${collapsed ? 'w-[58px]' : 'w-[300px]'} flex flex-col rounded-r-2xl`}>
+        <div className={`px-4 pt-8 pb-6 ${collapsed ? 'flex justify-center' : ''}`}>
+          <h1 className="font-bold tracking-tight text-white text-2xl">
+            {collapsed ? 'f' : 'finance.'}
           </h1>
         </div>
 
-        <nav className="flex-1 space-y-1.5">
+        <nav className="flex-1 pr-0 pb-4">
           {navItems.map(item => {
             const active = pathname === item.href;
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center ${collapsed ? 'justify-center' : 'gap-3 px-4'} py-3 rounded-xl transition-colors ${
-                  collapsed
-                    ? active
-                      ? 'text-[#37b8b4]'
-                      : 'text-slate-300 hover:text-white'
-                    : active
-                      ? 'bg-[#f4f4f4] text-[#1d1d2b] font-semibold'
-                      : 'text-slate-300 hover:bg-slate-700/50 hover:text-white'
+                className={`flex items-center ${collapsed ? 'justify-center px-0' : 'gap-4 pl-8 pr-6'} py-4 transition-colors border-r-4 ${
+                  active
+                    ? 'bg-[#f8f4f0] text-[#201f24] font-bold border-[#277c78]'
+                    : 'border-transparent hover:text-white'
                 }`}
                 title={item.label}
               >
-                <span className="text-[15px] leading-none">{item.icon}</span>
-                {!collapsed && <span>{item.label}</span>}
+                <span className="text-lg leading-none shrink-0">{item.icon}</span>
+                {!collapsed && <span className="text-sm">{item.label}</span>}
               </Link>
             );
           })}
         </nav>
 
-        <div className="space-y-2 pt-4">
+        <div className="px-4 pb-8">
           <button
             onClick={toggleSidebar}
-            className="w-full flex items-center justify-center gap-2 rounded-lg py-2 text-sm text-slate-300 hover:bg-slate-700/40"
+            className={`flex items-center ${collapsed ? 'justify-center w-full' : 'gap-3'} py-3 text-sm hover:text-white transition-colors`}
           >
-            <span>{collapsed ? '▸' : '◂'}</span>
+            <span className="text-base">{collapsed ? '▸' : '◂'}</span>
             {!collapsed && <span>Minimize Menu</span>}
           </button>
         </div>
       </aside>
 
-      <section className="flex-1 p-6 md:p-8 lg:p-10">
-        <header className="mb-6 flex items-center justify-between">
-          <h2 className="text-[42px] leading-none font-bold text-[#23232d]">{pageTitle}</h2>
+      <section className="flex-1 p-6 md:p-8 lg:p-10 overflow-auto">
+        <header className="mb-8 flex items-center justify-between">
+          <h2 className="text-[32px] leading-none font-bold text-[#201f24]">{pageTitle}</h2>
           <button
             onClick={logout}
-            className="inline-flex items-center gap-2 rounded-lg bg-[#1d1d2b] px-4 py-2 text-sm font-semibold text-white hover:bg-[#2a2a3c]"
+            className="inline-flex items-center gap-2 rounded-lg bg-[#201f24] px-4 py-2 text-sm font-semibold text-white hover:opacity-90 transition-opacity"
           >
             <span>↪</span>
             <span>Logout</span>

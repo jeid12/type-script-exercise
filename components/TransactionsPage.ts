@@ -37,7 +37,7 @@ export function renderTransactionsPage(onAddClick: () => void): void {
   const html = `
     <div class="space-y-6">
       <div class="flex items-center justify-end">
-        <button id="add-transaction-btn" class="rounded-xl bg-[#1d1d2b] px-6 py-3 text-white font-semibold hover:bg-[#2a2a3d] transition-colors">
+        <button id="add-transaction-btn" class="rounded-xl bg-[#201f24] px-6 py-3 text-white font-semibold hover:bg-[#2d2c31] transition-colors">
           +Add New Transaction
         </button>
       </div>
@@ -89,13 +89,13 @@ export function renderTransactionsPage(onAddClick: () => void): void {
         </div>
 
         <div class="mt-6 flex items-center justify-between">
-          <button id="tx-prev" class="rounded-xl bg-[#f4f1f1] px-5 py-3 text-[#8f8f9b] font-semibold disabled:opacity-40">
+          <button id="tx-prev" class="rounded-xl bg-[#f8f4f0] px-5 py-3 text-[#8f8f9b] font-semibold disabled:opacity-40">
             ◀ Prev
           </button>
 
-          <div id="tx-page-indicator" class="h-10 min-w-10 rounded-lg bg-[#1d1d2b] px-3 flex items-center justify-center text-white font-semibold">1</div>
+          <div id="tx-page-indicator" class="h-10 min-w-10 rounded-lg bg-[#201f24] px-3 flex items-center justify-center text-white font-semibold">1</div>
 
-          <button id="tx-next" class="rounded-xl bg-[#f4f1f1] px-5 py-3 text-[#8f8f9b] font-semibold disabled:opacity-40">
+          <button id="tx-next" class="rounded-xl bg-[#f8f4f0] px-5 py-3 text-[#8f8f9b] font-semibold disabled:opacity-40">
             Next ▶
           </button>
         </div>
