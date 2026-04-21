@@ -4,10 +4,10 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import * as dom from '@/lib/dom';
 import * as storage from '@/lib/storage';
-import { renderLoginPage } from '@/components/LoginPage';
-import { loginWithCredentials } from '@/lib/auth';
+import { renderSignupPage } from '@/components/SignupPage';
+import { signupWithCredentials } from '@/lib/auth';
 
-export default function LoginLandingPage() {
+export default function SignUpPage() {
   const router = useRouter();
 
   useEffect(() => {
@@ -16,16 +16,16 @@ export default function LoginLandingPage() {
       return;
     }
 
-    renderLoginPage(
-      () => router.push('/sign-up'),
-      (email: string, password: string) => {
-        const user = loginWithCredentials(email, password);
-        if (!user) {
-          const errorsDiv = dom.querySelector<HTMLDivElement>('#login-errors');
+    renderSignupPage(
+      () => router.push('/'),
+      (name: string, email: string, password: string) => {
+        const result = signupWithCredentials(name, email, password);
+        if (!result.ok) {
+          const errorsDiv = dom.querySelector<HTMLDivElement>('#signup-errors');
           if (!errorsDiv) return;
           dom.clearChildren(errorsDiv);
           const errorEl = dom.createElement('div', {
-            textContent: 'Invalid email or password',
+            textContent: result.message,
             className: 'text-red-500 text-sm p-3 bg-red-50 dark:bg-red-900/20 rounded',
           });
           dom.appendChild(errorsDiv, errorEl);
@@ -37,5 +37,5 @@ export default function LoginLandingPage() {
     );
   }, [router]);
 
-  return <div id="login-page" className="min-h-screen" />;
+  return <div id="signup-page" className="min-h-screen" />;
 }
