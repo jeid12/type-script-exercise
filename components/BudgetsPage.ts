@@ -73,10 +73,10 @@ function renderDonut(
   const ring = buildBudgetDonutGradient(budgets, totalLimit);
 
   return `
-    <div id="budget-balance-donut" class="js-balance-donut mx-auto mb-8 h-44 w-44 cursor-pointer rounded-full flex items-center justify-center" style="background: ${ring};">
-      <div class="h-24 w-24 rounded-full bg-white flex flex-col items-center justify-center text-center">
-        <p class="text-3xl leading-none font-bold text-[#1f2131]">$${Math.floor(totalSpent)}</p>
-        <p class="text-xs text-[#8a8f98]">of ${utils.formatCurrency(totalLimit)} limit</p>
+    <div id="budget-balance-donut" class="js-balance-donut mx-auto mb-8 h-48 w-48 cursor-pointer rounded-full flex items-center justify-center" style="background: ${ring};">
+      <div class="h-[120px] w-[120px] rounded-full bg-white flex flex-col items-center justify-center text-center">
+        <p class="text-2xl leading-none font-bold text-[#201f24]">$${Math.floor(totalSpent)}</p>
+        <p class="text-[11px] text-[#696868] mt-1">of ${utils.formatCurrency(totalLimit)} limit</p>
       </div>
     </div>
   `;
@@ -114,17 +114,17 @@ export function renderBudgetsPage(onAddClick: () => void): void {
   const html = `
     <div class="space-y-6">
       <div class="flex justify-end">
-        <button id="add-budget-btn" class="rounded-xl bg-[#201f24] px-6 py-3 text-white font-semibold hover:bg-[#2d2c31]">
-          +Add New Budget
+        <button id="add-budget-btn" class="rounded-lg bg-[#201f24] px-5 py-3 text-white text-sm font-bold hover:opacity-90 transition-opacity">
+          + Add New Budget
         </button>
       </div>
 
-      <div class="grid grid-cols-1 xl:grid-cols-[360px_1fr] gap-4">
-        <section class="rounded-xl border border-[#ece7e7] bg-white p-6">
+      <div class="grid grid-cols-1 xl:grid-cols-[320px_1fr] gap-4">
+        <section class="rounded-2xl bg-white p-6">
           ${renderDonut(totalSpent, totalLimit || 0, budgets)}
 
-          <h3 class="text-2xl leading-none font-bold text-[#252733] mb-6">Spending Summary</h3>
-          <div id="budgets-summary-list" class="space-y-4"></div>
+          <h3 class="text-lg font-bold text-[#201f24] mb-5">Spending Summary</h3>
+          <div id="budgets-summary-list" class="space-y-3"></div>
         </section>
 
         <section class="space-y-4" id="budgets-details"></section>
@@ -142,8 +142,8 @@ export function renderBudgetsPage(onAddClick: () => void): void {
   const detailsContainer = dom.querySelector<HTMLDivElement>('#budgets-details')!;
 
   if (budgets.length === 0) {
-    dom.setHTML(summaryList, '<p class="text-sm text-[#8a8f98]">No budget categories yet.</p>');
-    dom.setHTML(detailsContainer, '<div class="rounded-xl border border-[#ece7e7] bg-white p-10 text-center text-[#8a8f98]">No budgets yet. Add one to start tracking.</div>');
+    dom.setHTML(summaryList, '<p class="text-sm text-[#696868]">No budget categories yet.</p>');
+    dom.setHTML(detailsContainer, '<div class="rounded-2xl bg-white p-10 text-center text-sm text-[#696868]">No budgets yet. Add one to start tracking.</div>');
     return;
   }
 
@@ -158,64 +158,65 @@ export function renderBudgetsPage(onAddClick: () => void): void {
       .slice(0, 3);
 
     const latestSpendingHtml = latestSpending.length
-      ? latestSpending
-          .map(
-            transaction => `
-              <div class="flex items-center justify-between border-b border-[#e5dfdf] pb-3 last:border-b-0 last:pb-0">
-                <div>
-                  <p class="text-base leading-none font-bold text-[#252733]">${transaction.recipient || transaction.description || transaction.category}</p>
-                  <p class="mt-1 text-xs leading-none text-[#8a8f98]">${utils.formatDateShort(transaction.date)}</p>
-                </div>
-                <p class="text-base leading-none font-bold text-[#252733]">${utils.formatCurrency(transaction.amount)}</p>
+      ? latestSpending.map(transaction => `
+          <div class="flex items-center justify-between border-b border-[#f2eeeb] pb-3 last:border-0 last:pb-0">
+            <div class="flex items-center gap-3">
+              <div class="h-8 w-8 rounded-full bg-white text-xs font-bold text-[#201f24] flex items-center justify-center shrink-0">
+                ${(transaction.recipient || transaction.description || transaction.category).charAt(0).toUpperCase()}
               </div>
-            `
-          )
-          .join('')
-      : '<p class="text-center text-sm leading-none text-[#8a8f98]">You haven\'t made any spendings yet.</p>';
+              <div>
+                <p class="text-sm font-bold text-[#201f24]">${transaction.recipient || transaction.description || transaction.category}</p>
+                <p class="text-xs text-[#696868]">${utils.formatDateShort(transaction.date)}</p>
+              </div>
+            </div>
+            <p class="text-sm font-bold text-[#201f24]">-${utils.formatCurrency(transaction.amount)}</p>
+          </div>
+        `).join('')
+      : '<p class="text-sm text-[#696868]">No spending yet.</p>';
 
     const summaryRow = dom.createElement('div', {
-      className: 'flex items-center justify-between border-b border-[#ece7e7] pb-3',
+      className: 'flex items-center justify-between border-b border-[#f2eeeb] pb-3 last:border-0',
       innerHTML: `
-        <div class="flex items-center gap-2">
-          <span class="inline-block h-5 w-1 rounded" style="background:${theme.color}"></span>
-          <span class="text-base leading-none text-[#6f7480]">${budget.category}</span>
+        <div class="flex items-center gap-3">
+          <span class="inline-block h-4 w-1 rounded-full" style="background:${theme.color}"></span>
+          <span class="text-sm text-[#696868]">${budget.category}</span>
         </div>
-        <span class="text-lg leading-none font-bold text-[#2a2c37]">${utils.formatCurrency(spent)} <span class="text-[#8a8f98] font-medium">of ${utils.formatCurrency(budget.maxSpend)}</span></span>
+        <span class="text-sm font-bold text-[#201f24]">${utils.formatCurrency(spent)} <span class="text-[#696868] font-normal">of ${utils.formatCurrency(budget.maxSpend)}</span></span>
       `,
     });
 
     const card = dom.createElement('article', {
-      className: 'rounded-xl border border-[#ece7e7] bg-white p-6',
+      className: 'rounded-2xl bg-white p-6',
       innerHTML: `
-        <div class="flex items-start justify-between mb-3">
+        <div class="flex items-start justify-between mb-4">
           <div class="flex items-center gap-3">
-            <span class="inline-block h-4 w-4 rounded-full" style="background:${theme.color}"></span>
-            <h4 class="text-2xl leading-none font-bold text-[#252733]">${budget.category}</h4>
+            <span class="inline-block h-4 w-4 rounded-full shrink-0" style="background:${theme.color}"></span>
+            <h4 class="text-xl font-bold text-[#201f24]">${budget.category}</h4>
           </div>
-          <button class="text-xl text-[#4f5664]">•••</button>
+          <button class="text-sm text-[#696868] hover:text-[#201f24]">•••</button>
         </div>
 
-        <p class="text-base leading-none text-[#6f7480] mb-5">Maximum of ${budget.maxSpend.toFixed(2)}</p>
+        <p class="text-sm text-[#696868] mb-4">Maximum of ${utils.formatCurrency(budget.maxSpend)}</p>
 
-        <div class="h-6 rounded-md bg-[#f3efef] overflow-hidden mb-4">
-          <div class="h-full" style="width:${percent}%; background:${theme.color};"></div>
+        <div class="h-8 rounded-lg bg-[#f8f4f0] overflow-hidden mb-3 p-1">
+          <div class="h-full rounded" style="width:${percent}%; background:${theme.color};"></div>
         </div>
 
-        <div class="grid grid-cols-2 gap-4 border-t border-[#ece7e7] pt-4 mb-4">
+        <div class="grid grid-cols-2 gap-4 mb-5">
           <div class="border-l-4 pl-3" style="border-color:${theme.color};">
-            <p class="text-sm leading-none text-[#8a8f98]">Spent</p>
-            <p class="text-2xl leading-none font-bold text-[#252733]">${utils.formatCurrency(spent)}</p>
+            <p class="text-xs text-[#696868] mb-1">Spent</p>
+            <p class="text-sm font-bold text-[#201f24]">${utils.formatCurrency(spent)}</p>
           </div>
-          <div class="border-l-4 border-[#ece7e7] pl-3">
-            <p class="text-sm leading-none text-[#8a8f98]">Free</p>
-            <p class="text-2xl leading-none font-bold text-[#252733]">${utils.formatCurrency(free)}</p>
+          <div class="border-l-4 border-[#f2eeeb] pl-3">
+            <p class="text-xs text-[#696868] mb-1">Remaining</p>
+            <p class="text-sm font-bold text-[#201f24]">${utils.formatCurrency(free)}</p>
           </div>
         </div>
 
-        <div class="rounded-xl bg-[#f6f2f2] p-4">
+        <div class="rounded-xl bg-[#f8f4f0] p-4">
           <div class="mb-4 flex items-center justify-between">
-            <h5 class="text-xl leading-none font-bold text-[#252733]">Latest Spending</h5>
-            <a href="/transactions" class="text-sm leading-none text-[#6f7480] hover:text-[#3f4756]">See All <span class="ml-1">›</span></a>
+            <h5 class="text-sm font-bold text-[#201f24]">Latest Spending</h5>
+            <a href="/transactions" class="text-xs text-[#696868] hover:text-[#201f24] flex items-center gap-1">See All <span>›</span></a>
           </div>
           <div class="space-y-3">${latestSpendingHtml}</div>
         </div>
@@ -229,26 +230,27 @@ export function renderBudgetsPage(onAddClick: () => void): void {
 
 export function showAddBudgetForm(onAdd: (category: string, maxSpend: number, theme: string) => void): void {
   const overlay = dom.createElement('div', {
-    className: 'fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4',
+    className: 'fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4',
     innerHTML: `
-      <div class="w-full max-w-[610px] rounded-xl bg-white p-6 shadow-2xl">
-        <div class="mb-4 flex items-center justify-between">
-          <h3 class="text-3xl leading-none font-bold text-[#1f2131]">Add New Budget</h3>
-          <button id="close-budget-modal" class="text-2xl text-[#777b86] hover:text-[#1f2131]">×</button>
+      <div class="w-full max-w-[560px] rounded-2xl bg-white p-8 shadow-2xl">
+        <div class="mb-5 flex items-center justify-between">
+          <h3 class="text-xl font-bold text-[#201f24]">Add New Budget</h3>
+          <button id="close-budget-modal" class="text-[#696868] hover:text-[#201f24] text-xl leading-none">×</button>
         </div>
 
-        <p class="mb-6 text-sm text-[#7f8ba0]">Choose a category to set a spending budget. These categories can help you monitor spending.</p>
+        <p class="mb-5 text-sm text-[#696868]">Choose a category to set a spending budget. These categories can help you monitor spending.</p>
 
         <form id="budget-form" class="space-y-4">
           <div>
-            <label class="mb-2 block text-sm font-semibold text-[#6e7280]">Category</label>
-            <select name="category" class="h-12 w-full rounded-lg border border-[#cfd4dc] px-4 text-base leading-none text-[#1f2131] focus:outline-none" required>
+            <label class="mb-1 block text-xs font-bold text-[#201f24]">Budget Category</label>
+            <select name="category" class="h-11 w-full rounded-lg border border-[#98908b] px-4 text-sm text-[#201f24] focus:outline-none focus:border-[#201f24] bg-white" required>
               <option value="">Select a category</option>
               <option value="Bills">Bills</option>
-              <option value="Shopping">Shopping</option>
-              <option value="Food">Food</option>
-              <option value="Transport">Transport</option>
+              <option value="Dining Out">Dining Out</option>
+              <option value="Groceries">Groceries</option>
               <option value="Entertainment">Entertainment</option>
+              <option value="Transportation">Transportation</option>
+              <option value="Shopping">Shopping</option>
               <option value="Health">Health</option>
               <option value="Education">Education</option>
               <option value="Other">Other</option>
@@ -256,30 +258,35 @@ export function showAddBudgetForm(onAdd: (category: string, maxSpend: number, th
           </div>
 
           <div>
-            <label class="mb-2 block text-sm font-semibold text-[#6e7280]">Maximum Spend</label>
-            <input name="maxSpend" type="number" step="0.01" min="0" placeholder="e.g. $2000" class="h-12 w-full rounded-lg border border-[#cfd4dc] px-4 text-base leading-none text-[#1f2131] focus:outline-none" required>
+            <label class="mb-1 block text-xs font-bold text-[#201f24]">Maximum Spend</label>
+            <div class="relative">
+              <span class="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-[#696868]">$</span>
+              <input name="maxSpend" type="number" step="0.01" min="0" placeholder="e.g. 2000"
+                class="h-11 w-full rounded-lg border border-[#98908b] pl-7 pr-4 text-sm text-[#201f24] focus:outline-none focus:border-[#201f24]" required>
+            </div>
           </div>
 
           <div>
-            <label class="mb-2 block text-sm font-semibold text-[#6e7280]">Theme</label>
-            <select name="theme" class="h-12 w-full rounded-lg border border-[#cfd4dc] px-4 text-base leading-none text-[#1f2131] focus:outline-none" required>
+            <label class="mb-1 block text-xs font-bold text-[#201f24]">Theme</label>
+            <select name="theme" class="h-11 w-full rounded-lg border border-[#98908b] px-4 text-sm text-[#201f24] focus:outline-none focus:border-[#201f24] bg-white" required>
               <option value="">Select a theme</option>
-              <option value="green">Green</option>
-              <option value="grey">Grey</option>
-              <option value="cyan">Cyan</option>
-              <option value="orange">Orange</option>
-              <option value="purple">Purple</option>
-              <option value="red">Red</option>
-              <option value="yellow">Yellow</option>
-              <option value="navy">Navy</option>
-              <option value="turquoise">Turquoise</option>
-              <option value="brown">Brown</option>
-              <option value="magenta">Magenta</option>
+              <option value="green">● Green</option>
+              <option value="yellow">● Yellow</option>
+              <option value="cyan">● Cyan</option>
+              <option value="navy">● Navy</option>
+              <option value="red">● Red</option>
+              <option value="purple">● Purple</option>
+              <option value="turquoise">● Turquoise</option>
+              <option value="brown">● Brown</option>
+              <option value="magenta">● Magenta</option>
+              <option value="blue">● Blue</option>
+              <option value="grey">● Grey</option>
+              <option value="orange">● Orange</option>
             </select>
           </div>
 
-          <button type="submit" class="mt-2 h-12 w-full rounded-lg bg-[#201f24] text-lg font-semibold text-white hover:bg-[#2d2c31]">
-            Submit
+          <button type="submit" class="mt-2 h-12 w-full rounded-lg bg-[#201f24] text-sm font-bold text-white hover:opacity-90 transition-opacity">
+            Add Budget
           </button>
         </form>
       </div>

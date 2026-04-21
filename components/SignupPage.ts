@@ -7,12 +7,17 @@ export function renderSignupPage(onLoginClick: () => void, onSubmit: (name: stri
 
   const html = `
     <div class="min-h-screen flex bg-[#f8f4f0]">
-      <div class="hidden lg:flex w-[560px] shrink-0 bg-[#201f24] text-white m-5 flex-col justify-between rounded-2xl p-10">
-        <div>
+      <div class="hidden lg:flex w-[560px] shrink-0 bg-[#201f24] text-white m-5 flex-col justify-between rounded-2xl p-10 overflow-hidden relative">
+        <div class="relative z-10">
           <h1 class="text-2xl font-bold tracking-tight">finance.</h1>
         </div>
-        <div>
-          <h2 class="text-[2rem] font-bold mb-6 leading-tight">Keep track of your money and save for your future</h2>
+        <img
+          src="/illustration.png"
+          alt=""
+          class="absolute inset-0 w-full h-full object-cover object-center opacity-60 pointer-events-none"
+        />
+        <div class="relative z-10">
+          <h2 class="text-[2rem] font-bold mb-4 leading-tight">Keep track of your money and save for your future</h2>
           <p class="text-sm text-[#b3b3b3] leading-relaxed">Personal finance app puts you in control of your spending. Track transactions, set budgets, and add to savings pots easily.</p>
         </div>
       </div>
