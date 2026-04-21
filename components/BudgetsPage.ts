@@ -27,9 +27,38 @@ function getTheme(theme: string): ThemeStyle {
   return themeMap[key] || themeMap.magenta;
 }
 
-function renderDonut(totalSpent: number, totalLimit: number): string {
-  const percentage = totalLimit > 0 ? Math.min(100, Math.round((totalSpent / totalLimit) * 100)) : 0;
-  const ring = `conic-gradient(#9d507d ${percentage}%, #ece7e7 ${percentage}% 100%)`;
+function buildBudgetDonutGradient(
+  budgets: Array<{ maxSpend: number; theme: string }>,
+  totalLimit: number
+): string {
+  if (budgets.length === 0 || totalLimit <= 0) {
+    return 'conic-gradient(#ece7e7 0% 100%)';
+  }
+
+  let start = 0;
+  const slices: string[] = [];
+
+  budgets.forEach((budget, index) => {
+    const ratio = Math.max(0, budget.maxSpend) / totalLimit;
+    const end = index === budgets.length - 1 ? 100 : Math.min(100, start + ratio * 100);
+    const color = getTheme(budget.theme).color;
+    slices.push(`${color} ${start.toFixed(2)}% ${end.toFixed(2)}%`);
+    start = end;
+  });
+
+  if (start < 100) {
+    slices.push(`#ece7e7 ${start.toFixed(2)}% 100%`);
+  }
+
+  return `conic-gradient(${slices.join(', ')})`;
+}
+
+function renderDonut(
+  totalSpent: number,
+  totalLimit: number,
+  budgets: Array<{ maxSpend: number; theme: string }>
+): string {
+  const ring = buildBudgetDonutGradient(budgets, totalLimit);
 
   return `
     <div class="mx-auto mb-8 h-44 w-44 rounded-full flex items-center justify-center" style="background: ${ring};">
@@ -61,7 +90,7 @@ export function renderBudgetsPage(onAddClick: () => void): void {
 
       <div class="grid grid-cols-1 xl:grid-cols-[360px_1fr] gap-4">
         <section class="rounded-xl border border-[#ece7e7] bg-white p-6">
-          ${renderDonut(totalSpent, totalLimit || 1)}
+          ${renderDonut(totalSpent, totalLimit || 0, budgets)}
 
           <h3 class="text-[39px] leading-none font-bold text-[#252733] mb-6">Spending Summary</h3>
           <div id="budgets-summary-list" class="space-y-4"></div>

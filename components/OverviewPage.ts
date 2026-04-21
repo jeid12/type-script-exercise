@@ -2,6 +2,51 @@ import * as dom from '@/lib/dom';
 import * as storage from '@/lib/storage';
 import * as utils from '@/lib/utils';
 
+const themeColorMap: Record<string, string> = {
+  green: '#2f8f8c',
+  grey: '#6f6f73',
+  cyan: '#79d2de',
+  orange: '#d2895a',
+  purple: '#8c74c7',
+  red: '#d2524b',
+  yellow: '#e9be74',
+  navy: '#585a70',
+  turquoise: '#89a9a8',
+  brown: '#8c6c56',
+  magenta: '#9d507d',
+  blue: '#4f8fd8',
+};
+
+function resolveThemeColor(theme: string): string {
+  const key = theme.trim().toLowerCase();
+  return themeColorMap[key] || themeColorMap.magenta;
+}
+
+function buildBudgetDonutGradient(
+  budgets: Array<{ maxSpend: number; theme: string }>,
+  totalLimit: number
+): string {
+  if (budgets.length === 0 || totalLimit <= 0) {
+    return 'conic-gradient(#ece7e7 0% 100%)';
+  }
+
+  let start = 0;
+  const slices: string[] = [];
+
+  budgets.forEach((budget, index) => {
+    const ratio = Math.max(0, budget.maxSpend) / totalLimit;
+    const end = index === budgets.length - 1 ? 100 : Math.min(100, start + ratio * 100);
+    slices.push(`${resolveThemeColor(budget.theme)} ${start.toFixed(2)}% ${end.toFixed(2)}%`);
+    start = end;
+  });
+
+  if (start < 100) {
+    slices.push(`#ece7e7 ${start.toFixed(2)}% 100%`);
+  }
+
+  return `conic-gradient(${slices.join(', ')})`;
+}
+
 export function renderOverviewPage(): void {
   const page = dom.querySelector<HTMLDivElement>('#overview-page')!;
   dom.clearChildren(page);
@@ -16,6 +61,10 @@ export function renderOverviewPage(): void {
   const firstPot = pots[0];
   const firstBudget = budgets[0];
   const budgetSpent = firstBudget ? expensesByCategory[firstBudget.category] || 0 : 0;
+  const totalBudgetLimit = budgets.reduce((sum, budget) => sum + budget.maxSpend, 0);
+  const totalBudgetSpent = budgets.reduce((sum, budget) => sum + (expensesByCategory[budget.category] || 0), 0);
+  const budgetsRing = buildBudgetDonutGradient(budgets, totalBudgetLimit);
+  const firstBudgetColor = firstBudget ? resolveThemeColor(firstBudget.theme) : '#9d507d';
 
   const html = `
     <div class="space-y-4">
@@ -72,15 +121,15 @@ export function renderOverviewPage(): void {
 
             <div class="grid grid-cols-1 lg:grid-cols-[1fr_auto] items-center gap-4">
               <div class="flex justify-center">
-                <div class="w-36 h-36 rounded-full bg-[#a24c7d] flex items-center justify-center">
+                <div class="w-36 h-36 rounded-full flex items-center justify-center" style="background:${budgetsRing};">
                   <div class="w-24 h-24 rounded-full bg-white flex flex-col items-center justify-center">
-                    <span class="text-4xl leading-none font-bold text-[#1f2131]">$${Math.floor(budgetSpent)}</span>
-                    <span class="text-[11px] text-slate-500">of ${firstBudget ? utils.formatCurrency(firstBudget.maxSpend) : '$0'} limit</span>
+                    <span class="text-4xl leading-none font-bold text-[#1f2131]">$${Math.floor(totalBudgetSpent)}</span>
+                    <span class="text-[11px] text-slate-500">of ${utils.formatCurrency(totalBudgetLimit)} limit</span>
                   </div>
                 </div>
               </div>
               <div class="lg:pr-3">
-                <div class="border-l-4 border-[#a24c7d] pl-2">
+                <div class="border-l-4 pl-2" style="border-color:${firstBudgetColor};">
                   <p class="text-sm text-slate-500">${firstBudget ? firstBudget.category : 'No Budget'}</p>
                   <p class="font-semibold text-[#1f2131]">${utils.formatCurrency(budgetSpent)}</p>
                 </div>
