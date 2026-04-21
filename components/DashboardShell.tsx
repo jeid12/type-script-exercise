@@ -32,7 +32,7 @@ export default function DashboardShell({ children }: Props) {
 
   const [ready, setReady] = useState(false);
   const [user, setUser] = useState<User | null>(null);
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(true);
 
   useEffect(() => {
     const currentUser = storage.getUser();
@@ -41,7 +41,8 @@ export default function DashboardShell({ children }: Props) {
       return;
     }
 
-    const sidebarState = localStorage.getItem('finance_sidebar_collapsed') === 'true';
+    const storedSidebarState = localStorage.getItem('finance_sidebar_collapsed');
+    const sidebarState = storedSidebarState === null ? true : storedSidebarState === 'true';
     setCollapsed(sidebarState);
     setUser(currentUser);
     setReady(true);
@@ -69,56 +70,60 @@ export default function DashboardShell({ children }: Props) {
   }
 
   return (
-    <div className="min-h-screen bg-[#f5f2f2] text-slate-900 flex">
-      <aside className={`bg-[#1d1d2b] text-slate-100 transition-all duration-300 ${collapsed ? 'w-24' : 'w-64'} p-4 md:p-6 flex flex-col rounded-r-3xl`}>
-        <div className="mb-10">
-          <h1 className={`font-bold tracking-tight ${collapsed ? 'text-3xl text-center' : 'text-5xl'}`}>
+    <div className="min-h-screen bg-[#f4f1f1] text-slate-900 flex">
+      <aside className={`bg-[#1d1d2b] text-slate-100 transition-all duration-300 ${collapsed ? 'w-[58px]' : 'w-60'} p-3 md:p-4 flex flex-col`}>
+        <div className={`mb-8 ${collapsed ? 'mt-1' : 'mt-2'}`}>
+          <h1 className={`font-bold tracking-tight ${collapsed ? 'text-4xl text-center' : 'text-4xl px-2'}`}>
             {collapsed ? 'f' : 'finance'}
           </h1>
         </div>
 
-        <nav className="flex-1 space-y-2">
+        <nav className="flex-1 space-y-1.5">
           {navItems.map(item => {
             const active = pathname === item.href;
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center ${collapsed ? 'justify-center' : 'gap-4 px-4'} py-3 rounded-xl transition-colors ${
-                  active
-                    ? 'bg-[#f4f4f4] text-[#1d1d2b] font-semibold'
-                    : 'text-slate-300 hover:bg-slate-700/50 hover:text-white'
+                className={`flex items-center ${collapsed ? 'justify-center' : 'gap-3 px-4'} py-3 rounded-xl transition-colors ${
+                  collapsed
+                    ? active
+                      ? 'text-[#37b8b4]'
+                      : 'text-slate-300 hover:text-white'
+                    : active
+                      ? 'bg-[#f4f4f4] text-[#1d1d2b] font-semibold'
+                      : 'text-slate-300 hover:bg-slate-700/50 hover:text-white'
                 }`}
                 title={item.label}
               >
-                <span className="text-lg">{item.icon}</span>
+                <span className="text-[15px] leading-none">{item.icon}</span>
                 {!collapsed && <span>{item.label}</span>}
               </Link>
             );
           })}
         </nav>
 
-        <div className="space-y-3 pt-6">
+        <div className="space-y-2 pt-4">
           <button
             onClick={toggleSidebar}
-            className="w-full flex items-center justify-center gap-2 rounded-xl border border-slate-500/40 py-2 text-sm text-slate-200 hover:bg-slate-700/40"
+            className="w-full flex items-center justify-center gap-2 rounded-lg py-2 text-sm text-slate-300 hover:bg-slate-700/40"
           >
             <span>{collapsed ? '▸' : '◂'}</span>
             {!collapsed && <span>Minimize Menu</span>}
-          </button>
-          <button
-            onClick={logout}
-            className="w-full rounded-xl bg-slate-100 text-slate-900 py-2 font-semibold hover:bg-white"
-          >
-            {collapsed ? '↩' : 'Logout'}
           </button>
         </div>
       </aside>
 
       <section className="flex-1 p-6 md:p-8 lg:p-10">
-        <header className="mb-8 flex items-center justify-between">
-          <h2 className="text-4xl font-bold text-[#22222d]">{pageTitle}</h2>
-          <p className="hidden md:block text-sm text-slate-500">Welcome, {user.name}</p>
+        <header className="mb-6 flex items-center justify-between">
+          <h2 className="text-[42px] leading-none font-bold text-[#23232d]">{pageTitle}</h2>
+          <button
+            onClick={logout}
+            className="inline-flex items-center gap-2 rounded-lg bg-[#1d1d2b] px-4 py-2 text-sm font-semibold text-white hover:bg-[#2a2a3c]"
+          >
+            <span>↪</span>
+            <span>Logout</span>
+          </button>
         </header>
 
         {children}

@@ -10,190 +10,109 @@ export function renderOverviewPage(): void {
   const pots = storage.getPots();
   const budgets = storage.getBudgets();
   const transactions = storage.getTransactions();
-  const bills = storage.getBills();
   const billsSummary = storage.getBillsSummary();
-
-  const summaryHtml = `
-    <div>
-      <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-6">Summary</h3>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div class="bg-slate-900 dark:bg-slate-800 text-white p-8 rounded-2xl shadow-lg">
-          <p class="text-slate-300 text-sm font-medium mb-2">Current Balance</p>
-          <p class="text-4xl font-bold">${utils.formatCurrency(summary.balance)}</p>
-        </div>
-        <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-8 rounded-2xl shadow-sm">
-          <p class="text-slate-600 dark:text-slate-400 text-sm font-medium mb-2">Income</p>
-          <p class="text-4xl font-bold text-green-600 dark:text-green-400">${utils.formatCurrency(summary.income)}</p>
-        </div>
-        <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-8 rounded-2xl shadow-sm">
-          <p class="text-slate-600 dark:text-slate-400 text-sm font-medium mb-2">Expenses</p>
-          <p class="text-4xl font-bold text-red-600 dark:text-red-400">${utils.formatCurrency(summary.expenses)}</p>
-        </div>
-      </div>
-    </div>
-  `;
-
-  dom.setHTML(page, summaryHtml);
-
-  const potsHtml = `
-    <div>
-      <div class="flex justify-between items-center mb-6">
-        <h3 class="text-2xl font-bold text-slate-900 dark:text-white">Pots</h3>
-        <a href="/pots" class="text-blue-600 dark:text-blue-400 hover:underline font-medium">See Details →</a>
-      </div>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="overview-pots">
-        ${pots.length === 0 ? '<p class="text-slate-500 dark:text-slate-400 col-span-full text-center py-12">No pots yet. Create one to start saving!</p>' : ''}
-      </div>
-    </div>
-  `;
-
-  const potsDiv = dom.createElement('div', { innerHTML: potsHtml });
-  dom.appendChild(page, potsDiv);
-
-  pots.slice(0, 2).forEach(pot => {
-    const percentage = utils.calculatePercentage(pot.saved, pot.target);
-    const potsContainer = dom.querySelector<HTMLDivElement>('#overview-pots')!;
-
-    const potCard = dom.createElement('div', {
-      className: `bg-white dark:bg-slate-800 border border-t-4 border-slate-200 dark:border-slate-700 rounded-2xl p-8 shadow-sm`,
-      innerHTML: `
-        <h4 class="font-bold text-lg text-slate-900 dark:text-white mb-6">${pot.name}</h4>
-        <div class="space-y-4">
-          <div>
-            <div class="flex justify-between mb-2">
-              <span class="text-sm text-slate-600 dark:text-slate-400">Total Saved</span>
-              <span class="font-bold text-slate-900 dark:text-white">${percentage}%</span>
-            </div>
-            <div class="w-full bg-slate-200 dark:bg-slate-700 h-3 rounded-full overflow-hidden">
-              <div class="bg-slate-600 dark:bg-blue-500 h-full" style="width: ${Math.min(percentage, 100)}%"></div>
-            </div>
-          </div>
-          <div class="flex justify-between text-sm">
-            <span class="text-slate-600 dark:text-slate-400">${utils.formatCurrency(pot.saved)}</span>
-            <span class="text-slate-600 dark:text-slate-400">Target: ${utils.formatCurrency(pot.target)}</span>
-          </div>
-        </div>
-      `,
-    });
-
-    dom.appendChild(potsContainer, potCard);
-  });
-
-  const budgetsHtml = `
-    <div>
-      <div class="flex justify-between items-center mb-6">
-        <h3 class="text-2xl font-bold text-slate-900 dark:text-white">Budgets</h3>
-        <a href="/budgets" class="text-blue-600 dark:text-blue-400 hover:underline font-medium">See Details →</a>
-      </div>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="overview-budgets">
-        ${budgets.length === 0 ? '<p class="text-slate-500 dark:text-slate-400 col-span-full text-center py-12">No budgets yet. Set one to track spending!</p>' : ''}
-      </div>
-    </div>
-  `;
-
-  const budgetsDiv = dom.createElement('div', { innerHTML: budgetsHtml });
-  dom.appendChild(page, budgetsDiv);
-
   const expensesByCategory = storage.getExpensesByCategory();
-  budgets.slice(0, 4).forEach(budget => {
-    const spent = expensesByCategory[budget.category] || 0;
-    const percentage = utils.calculatePercentage(spent, budget.maxSpend);
-    const budgetsContainer = dom.querySelector<HTMLDivElement>('#overview-budgets')!;
 
-    const budgetCard = dom.createElement('div', {
-      className: 'bg-white dark:bg-slate-800 rounded-2xl p-8 shadow-sm border border-slate-200 dark:border-slate-700',
-      innerHTML: `
-        <div class="flex justify-between items-start mb-6">
-          <h4 class="font-bold text-lg text-slate-900 dark:text-white">${budget.category}</h4>
-          <div class="inline-block px-3 py-1 bg-slate-100 dark:bg-slate-700 rounded-full text-xs font-semibold text-slate-700 dark:text-slate-300">${percentage}%</div>
+  const firstPot = pots[0];
+  const firstBudget = budgets[0];
+  const budgetSpent = firstBudget ? expensesByCategory[firstBudget.category] || 0 : 0;
+
+  const html = `
+    <div class="space-y-4">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="bg-[#1d1d2b] text-white rounded-xl p-4">
+          <p class="text-xs text-slate-300 mb-2">Current Balance</p>
+          <p class="text-[46px] leading-none font-bold">${utils.formatCurrency(summary.balance)}</p>
         </div>
-        <div class="space-y-4">
-          <div class="w-full bg-slate-200 dark:bg-slate-700 h-2 rounded-full overflow-hidden">
-            <div class="bg-slate-600 dark:bg-blue-500 h-full" style="width: ${Math.min(percentage, 100)}%"></div>
-          </div>
-          <div class="flex justify-between text-sm">
-            <span class="text-slate-600 dark:text-slate-400">${utils.formatCurrency(spent)} spent</span>
-            <span class="text-slate-600 dark:text-slate-400">Budget: ${utils.formatCurrency(budget.maxSpend)}</span>
-          </div>
+        <div class="bg-white rounded-xl p-4 border border-[#ece7e7]">
+          <p class="text-xs text-slate-400 mb-2">Income</p>
+          <p class="text-[46px] leading-none font-bold text-[#202233]">${utils.formatCurrency(summary.income)}</p>
         </div>
-      `,
-    });
-
-    dom.appendChild(budgetsContainer, budgetCard);
-  });
-
-  const transactionsHtml = `
-    <div>
-      <div class="flex justify-between items-center mb-6">
-        <h3 class="text-2xl font-bold text-slate-900 dark:text-white">Recent Transactions</h3>
-        <a href="/transactions" class="text-blue-600 dark:text-blue-400 hover:underline font-medium">See All →</a>
+        <div class="bg-white rounded-xl p-4 border border-[#ece7e7]">
+          <p class="text-xs text-slate-400 mb-2">Expenses</p>
+          <p class="text-[46px] leading-none font-bold text-[#202233]">${utils.formatCurrency(summary.expenses)}</p>
+        </div>
       </div>
-      <div class="bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-sm border border-slate-200 dark:border-slate-700">
-        <div id="overview-transactions" class="divide-y divide-slate-200 dark:divide-slate-700">
-          ${transactions.length === 0 ? '<p class="text-slate-500 dark:text-slate-400 text-center py-12">No transactions yet</p>' : ''}
+
+      <div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
+        <div class="space-y-3">
+          <section class="bg-white rounded-xl border border-[#ece7e7] p-4">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="text-[32px] leading-none font-semibold text-[#272833]">Pots</h3>
+              <a href="/pots" class="text-sm text-slate-500 hover:text-slate-700">See Details <span class="ml-1">›</span></a>
+            </div>
+
+            <div class="rounded-xl bg-[#f6f2f2] p-3 grid grid-cols-2 gap-3 items-center">
+              <div class="border-r border-[#d7d0d0] pr-3">
+                <p class="text-xs text-slate-500 mb-1">Pots</p>
+                <p class="text-5xl font-bold text-[#1f2131]">${firstPot ? Math.floor(firstPot.saved) : 0}</p>
+              </div>
+              <div>
+                <p class="text-xs text-slate-400">${firstPot ? firstPot.name : 'No pot yet'}</p>
+                <p class="text-4xl font-bold text-[#1f2131]">${firstPot ? utils.formatCurrency(firstPot.saved) : '$0'}</p>
+              </div>
+            </div>
+          </section>
+
+          <section class="bg-white rounded-xl border border-[#ece7e7] p-4 min-h-[132px]">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="text-[32px] leading-none font-semibold text-[#272833]">Transactions</h3>
+              <a href="/transactions" class="text-sm text-slate-500 hover:text-slate-700">See Details <span class="ml-1">›</span></a>
+            </div>
+            <p class="text-sm text-slate-400">${transactions.length === 0 ? 'No Data Provided' : `${transactions.length} transactions recorded`}</p>
+          </section>
+        </div>
+
+        <div class="space-y-3">
+          <section class="bg-white rounded-xl border border-[#ece7e7] p-4">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="text-[32px] leading-none font-semibold text-[#272833]">Budgets</h3>
+              <a href="/budgets" class="text-sm text-slate-500 hover:text-slate-700">See Details <span class="ml-1">›</span></a>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-[1fr_auto] items-center gap-4">
+              <div class="flex justify-center">
+                <div class="w-36 h-36 rounded-full bg-[#a24c7d] flex items-center justify-center">
+                  <div class="w-24 h-24 rounded-full bg-white flex flex-col items-center justify-center">
+                    <span class="text-4xl leading-none font-bold text-[#1f2131]">$${Math.floor(budgetSpent)}</span>
+                    <span class="text-[11px] text-slate-500">of ${firstBudget ? utils.formatCurrency(firstBudget.maxSpend) : '$0'} limit</span>
+                  </div>
+                </div>
+              </div>
+              <div class="lg:pr-3">
+                <div class="border-l-4 border-[#a24c7d] pl-2">
+                  <p class="text-sm text-slate-500">${firstBudget ? firstBudget.category : 'No Budget'}</p>
+                  <p class="font-semibold text-[#1f2131]">${utils.formatCurrency(budgetSpent)}</p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="bg-white rounded-xl border border-[#ece7e7] p-4">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="text-[32px] leading-none font-semibold text-[#272833]">Recurring Bills</h3>
+              <a href="/recurring-bills" class="text-sm text-slate-500 hover:text-slate-700">See Details <span class="ml-1">›</span></a>
+            </div>
+
+            <div class="space-y-2">
+              <div class="rounded-lg bg-[#f6f2f2] px-3 py-2 border-l-4 border-[#3f918d] flex items-center justify-between">
+                <span class="text-sm text-slate-500">Paid Bills</span>
+                <span class="font-semibold text-[#1f2131]">${utils.formatCurrency(billsSummary.paid)}</span>
+              </div>
+              <div class="rounded-lg bg-[#f6f2f2] px-3 py-2 border-l-4 border-[#f1be8d] flex items-center justify-between">
+                <span class="text-sm text-slate-500">Total Upcoming</span>
+                <span class="font-semibold text-[#1f2131]">${utils.formatCurrency(billsSummary.upcoming)}</span>
+              </div>
+              <div class="rounded-lg bg-[#f6f2f2] px-3 py-2 border-l-4 border-[#78d3e0] flex items-center justify-between">
+                <span class="text-sm text-slate-500">Due Soon</span>
+                <span class="font-semibold text-[#1f2131]">${utils.formatCurrency(billsSummary.due)}</span>
+              </div>
+            </div>
+          </section>
         </div>
       </div>
     </div>
   `;
 
-  const transactionsDiv = dom.createElement('div', { innerHTML: transactionsHtml });
-  dom.appendChild(page, transactionsDiv);
-
-  const txContainer = dom.querySelector<HTMLDivElement>('#overview-transactions')!;
-  transactions.slice(0, 5).forEach(tx => {
-    const txRow = dom.createElement('div', {
-      className: 'flex justify-between items-center p-6 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors',
-      innerHTML: `
-        <div>
-          <p class="font-semibold text-slate-900 dark:text-white">${tx.description}</p>
-          <p class="text-sm text-slate-600 dark:text-slate-400">${utils.formatDateShort(tx.date)}</p>
-        </div>
-        <span class="font-bold ${tx.type === 'income' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}">
-          ${tx.type === 'income' ? '+' : '-'}${utils.formatCurrency(tx.amount)}
-        </span>
-      `,
-    });
-    dom.appendChild(txContainer, txRow);
-  });
-
-  const billsHtml = `
-    <div>
-      <div class="flex justify-between items-center mb-6">
-        <h3 class="text-2xl font-bold text-slate-900 dark:text-white">Recurring Bills Summary</h3>
-        <a href="/recurring-bills" class="text-blue-600 dark:text-blue-400 hover:underline font-medium">See All →</a>
-      </div>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div class="bg-white dark:bg-slate-800 rounded-2xl p-8 shadow-sm border border-slate-200 dark:border-slate-700">
-          <div class="flex items-center gap-4 mb-4">
-            <span class="text-3xl">✓</span>
-            <div>
-              <p class="text-sm text-slate-600 dark:text-slate-400">Paid Bills</p>
-              <p class="text-2xl font-bold text-slate-900 dark:text-white">${utils.formatCurrency(billsSummary.paid)}</p>
-            </div>
-          </div>
-        </div>
-        <div class="bg-white dark:bg-slate-800 rounded-2xl p-8 shadow-sm border border-slate-200 dark:border-slate-700">
-          <div class="flex items-center gap-4 mb-4">
-            <span class="text-3xl">📅</span>
-            <div>
-              <p class="text-sm text-slate-600 dark:text-slate-400">Total Upcoming</p>
-              <p class="text-2xl font-bold text-slate-900 dark:text-white">${utils.formatCurrency(billsSummary.upcoming)}</p>
-            </div>
-          </div>
-        </div>
-        <div class="bg-white dark:bg-slate-800 rounded-2xl p-8 shadow-sm border border-slate-200 dark:border-slate-700">
-          <div class="flex items-center gap-4 mb-4">
-            <span class="text-3xl">⚠️</span>
-            <div>
-              <p class="text-sm text-slate-600 dark:text-slate-400">Due Soon</p>
-              <p class="text-2xl font-bold text-red-600 dark:text-red-400">${utils.formatCurrency(billsSummary.due)}</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  `;
-
-  const billsDiv = dom.createElement('div', { innerHTML: billsHtml });
-  dom.appendChild(page, billsDiv);
+  dom.setHTML(page, html);
 }
