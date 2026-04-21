@@ -5,6 +5,7 @@ import * as utils from '@/lib/utils';
 type SortKey = 'latest' | 'oldest' | 'az' | 'za' | 'highest' | 'lowest';
 
 const PAGE_SIZE = 8;
+const TRANSACTION_CATEGORIES = ['Entertainment', 'Bill', 'Groceries', 'Dining Out', 'Transportation'] as const;
 
 function normalize(text: string): string {
   return text.trim().toLowerCase();
@@ -16,16 +17,22 @@ function getRecipientName(description: string, recipient: string): string {
   return description.trim() || 'Unknown';
 }
 
-function getCategoryList(): string[] {
-  const categories = storage.getTransactions().map(tx => tx.category.trim()).filter(Boolean);
-  return Array.from(new Set(categories)).sort((a, b) => a.localeCompare(b));
+function categoryMatches(selectedCategory: string, txCategory: string): boolean {
+  if (selectedCategory === 'all') return true;
+
+  const selected = normalize(selectedCategory);
+  const actual = normalize(txCategory);
+
+  if (selected === 'bill') {
+    return actual === 'bill' || actual === 'bills';
+  }
+
+  return selected === actual;
 }
 
 export function renderTransactionsPage(onAddClick: () => void): void {
   const page = dom.querySelector<HTMLDivElement>('#transactions-page')!;
   dom.clearChildren(page);
-
-  const categories = getCategoryList();
 
   const html = `
     <div class="space-y-6">
@@ -61,7 +68,7 @@ export function renderTransactionsPage(onAddClick: () => void): void {
               <label for="category-filter" class="text-sm text-slate-500">Filter by Category</label>
               <select id="category-filter" class="h-12 min-w-[180px] rounded-lg border border-[#d7dce2] px-3 text-[25px] leading-none text-[#1f2131] focus:outline-none">
                 <option value="all">All Transactions</option>
-                ${categories.map(category => `<option value="${category}">${category}</option>`).join('')}
+                ${TRANSACTION_CATEGORIES.map(category => `<option value="${category}">${category}</option>`).join('')}
               </select>
             </div>
           </div>
@@ -117,7 +124,7 @@ export function renderTransactionsPage(onAddClick: () => void): void {
       const recipient = getRecipientName(tx.description, tx.recipient);
       const haystack = `${recipient} ${tx.category} ${tx.description}`.toLowerCase();
       const matchesSearch = query === '' || haystack.includes(query);
-      const matchesCategory = category === 'all' || tx.category === category;
+      const matchesCategory = categoryMatches(category, tx.category);
       return matchesSearch && matchesCategory;
     });
 
@@ -266,13 +273,11 @@ export function showAddTransactionForm(
           <div>
             <label class="mb-2 block text-sm font-semibold text-[#6e7280]">Category</label>
             <select name="category" class="h-12 w-full rounded-lg border border-[#cfd4dc] px-4 text-[25px] leading-none text-[#1f2131] focus:outline-none" required>
-              <option value="Shopping">Shopping</option>
-              <option value="Bills">Bills</option>
-              <option value="Food">Food</option>
-              <option value="Transport">Transport</option>
               <option value="Entertainment">Entertainment</option>
-              <option value="Salary">Salary</option>
-              <option value="Other">Other</option>
+              <option value="Bill">Bill</option>
+              <option value="Groceries">Groceries</option>
+              <option value="Dining Out">Dining Out</option>
+              <option value="Transportation">Transportation</option>
             </select>
           </div>
 
