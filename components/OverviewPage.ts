@@ -3,18 +3,18 @@ import * as storage from '@/lib/storage';
 import * as utils from '@/lib/utils';
 
 const themeColorMap: Record<string, string> = {
-  green: '#2f8f8c',
-  grey: '#6f6f73',
-  cyan: '#79d2de',
-  orange: '#d2895a',
-  purple: '#8c74c7',
-  red: '#d2524b',
-  yellow: '#e9be74',
-  navy: '#585a70',
-  turquoise: '#89a9a8',
-  brown: '#8c6c56',
+  green: '#277c78',
+  grey: '#97a0ac',
+  cyan: '#82c9d7',
+  orange: '#be6c49',
+  purple: '#826cb0',
+  red: '#c94736',
+  yellow: '#f2cdac',
+  navy: '#626070',
+  turquoise: '#597c7c',
+  brown: '#93674f',
   magenta: '#9d507d',
-  blue: '#4f8fd8',
+  blue: '#3f82b2',
 };
 
 function resolveThemeColor(theme: string): string {
@@ -132,7 +132,7 @@ export function renderOverviewPage(): void {
 
             <div class="grid grid-cols-1 lg:grid-cols-[1fr_auto] items-center gap-4">
               <div class="flex justify-center">
-                <div class="w-36 h-36 rounded-full flex items-center justify-center" style="background:${budgetsRing};">
+                <div id="overview-balance-donut" class="js-balance-donut w-36 h-36 cursor-pointer rounded-full flex items-center justify-center" style="background:${budgetsRing};">
                   <div class="w-24 h-24 rounded-full bg-white flex flex-col items-center justify-center">
                     <span class="text-4xl leading-none font-bold text-[#1f2131]">$${Math.floor(totalBudgetSpent)}</span>
                     <span class="text-[11px] text-slate-500">of ${utils.formatCurrency(totalBudgetLimit)} limit</span>
@@ -172,4 +172,20 @@ export function renderOverviewPage(): void {
   `;
 
   dom.setHTML(page, html);
+
+  const donut = dom.querySelector<HTMLDivElement>('#overview-balance-donut');
+  if (!donut) return;
+
+  donut.addEventListener('click', () => {
+    if (donut.dataset.spun === 'true') return;
+    donut.dataset.spun = 'true';
+    donut.classList.add('balance-donut-spin-once');
+    donut.addEventListener(
+      'animationend',
+      () => {
+        donut.classList.remove('balance-donut-spin-once');
+      },
+      { once: true }
+    );
+  });
 }

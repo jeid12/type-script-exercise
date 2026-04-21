@@ -10,15 +10,20 @@ function progress(saved: number, target: number): number {
 function colorByTheme(theme: string): string {
   const key = theme.trim().toLowerCase();
   const map: Record<string, string> = {
-    blue: '#4f8fd8',
-    green: '#2f8f8c',
-    purple: '#8c74c7',
-    teal: '#3f918d',
-    pink: '#c66fa2',
-    red: '#d2524b',
-    orange: '#d2895a',
+    green: '#277c78',
+    grey: '#97a0ac',
+    cyan: '#82c9d7',
+    orange: '#be6c49',
+    purple: '#826cb0',
+    red: '#c94736',
+    yellow: '#f2cdac',
+    navy: '#626070',
+    turquoise: '#597c7c',
+    brown: '#93674f',
+    magenta: '#9d507d',
+    blue: '#3f82b2',
   };
-  return map[key] || '#3f918d';
+  return map[key] || '#277c78';
 }
 
 export function renderPotsPage(onAddClick: () => void): void {
@@ -115,12 +120,18 @@ export function showAddPotForm(onAdd: (name: string, target: number, theme: stri
           <div>
             <label class="mb-2 block text-sm font-semibold text-[#6e7280]">Theme</label>
             <select name="theme" class="h-12 w-full rounded-lg border border-[#cfd4dc] px-4 text-[25px] leading-none text-[#1f2131] focus:outline-none" required>
-              <option value="teal">Teal</option>
-              <option value="blue">Blue</option>
               <option value="green">Green</option>
-              <option value="purple">Purple</option>
-              <option value="pink">Pink</option>
+              <option value="grey">Grey</option>
+              <option value="cyan">Cyan</option>
               <option value="orange">Orange</option>
+              <option value="purple">Purple</option>
+              <option value="red">Red</option>
+              <option value="yellow">Yellow</option>
+              <option value="navy">Navy</option>
+              <option value="turquoise">Turquoise</option>
+              <option value="brown">Brown</option>
+              <option value="magenta">Magenta</option>
+              <option value="blue">Blue</option>
             </select>
           </div>
 

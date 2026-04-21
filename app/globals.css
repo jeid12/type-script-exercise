@@ -24,3 +24,19 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+@keyframes balanceDonutSpinOnce {
+  0% {
+    transform: rotate(0deg) scale(1);
+  }
+  55% {
+    transform: rotate(320deg) scale(1.03);
+  }
+  100% {
+    transform: rotate(360deg) scale(1);
+  }
+}
+
+.balance-donut-spin-once {
+  animation: balanceDonutSpinOnce 850ms cubic-bezier(0.22, 1, 0.36, 1);
+}

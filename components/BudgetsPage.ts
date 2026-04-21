@@ -8,18 +8,18 @@ type ThemeStyle = {
 };
 
 const themeMap: Record<string, ThemeStyle> = {
-  green: { name: 'Green', color: '#2f8f8c' },
-  grey: { name: 'Grey', color: '#6f6f73' },
-  cyan: { name: 'Cyan', color: '#79d2de' },
-  orange: { name: 'Orange', color: '#d2895a' },
-  purple: { name: 'Purple', color: '#8c74c7' },
-  red: { name: 'Red', color: '#d2524b' },
-  yellow: { name: 'Yellow', color: '#e9be74' },
-  navy: { name: 'Navy', color: '#585a70' },
-  turquoise: { name: 'Turquoise', color: '#89a9a8' },
-  brown: { name: 'Brown', color: '#8c6c56' },
+  green: { name: 'Green', color: '#277c78' },
+  grey: { name: 'Grey', color: '#97a0ac' },
+  cyan: { name: 'Cyan', color: '#82c9d7' },
+  orange: { name: 'Orange', color: '#be6c49' },
+  purple: { name: 'Purple', color: '#826cb0' },
+  red: { name: 'Red', color: '#c94736' },
+  yellow: { name: 'Yellow', color: '#f2cdac' },
+  navy: { name: 'Navy', color: '#626070' },
+  turquoise: { name: 'Turquoise', color: '#597c7c' },
+  brown: { name: 'Brown', color: '#93674f' },
   magenta: { name: 'Magenta', color: '#9d507d' },
-  blue: { name: 'Blue', color: '#4f8fd8' },
+  blue: { name: 'Blue', color: '#3f82b2' },
 };
 
 function getTheme(theme: string): ThemeStyle {
@@ -73,13 +73,31 @@ function renderDonut(
   const ring = buildBudgetDonutGradient(budgets, totalLimit);
 
   return `
-    <div class="mx-auto mb-8 h-44 w-44 rounded-full flex items-center justify-center" style="background: ${ring};">
+    <div id="budget-balance-donut" class="js-balance-donut mx-auto mb-8 h-44 w-44 cursor-pointer rounded-full flex items-center justify-center" style="background: ${ring};">
       <div class="h-24 w-24 rounded-full bg-white flex flex-col items-center justify-center text-center">
         <p class="text-[51px] leading-none font-bold text-[#1f2131]">$${Math.floor(totalSpent)}</p>
         <p class="text-xs text-[#8a8f98]">of ${utils.formatCurrency(totalLimit)} limit</p>
       </div>
     </div>
   `;
+}
+
+function attachDonutSpinOnFirstClick(selector: string): void {
+  const donut = dom.querySelector<HTMLDivElement>(selector);
+  if (!donut) return;
+
+  donut.addEventListener('click', () => {
+    if (donut.dataset.spun === 'true') return;
+    donut.dataset.spun = 'true';
+    donut.classList.add('balance-donut-spin-once');
+    donut.addEventListener(
+      'animationend',
+      () => {
+        donut.classList.remove('balance-donut-spin-once');
+      },
+      { once: true }
+    );
+  });
 }
 
 export function renderBudgetsPage(onAddClick: () => void): void {
@@ -115,6 +133,7 @@ export function renderBudgetsPage(onAddClick: () => void): void {
   `;
 
   dom.setHTML(page, html);
+  attachDonutSpinOnFirstClick('#budget-balance-donut');
 
   const addBtn = dom.querySelector<HTMLButtonElement>('#add-budget-btn')!;
   dom.addEventListener(addBtn, 'click', onAddClick);
