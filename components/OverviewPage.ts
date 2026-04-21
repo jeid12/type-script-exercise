@@ -59,12 +59,23 @@ export function renderOverviewPage(): void {
   const expensesByCategory = storage.getExpensesByCategory();
 
   const firstPot = pots[0];
-  const firstBudget = budgets[0];
-  const budgetSpent = firstBudget ? expensesByCategory[firstBudget.category] || 0 : 0;
   const totalBudgetLimit = budgets.reduce((sum, budget) => sum + budget.maxSpend, 0);
   const totalBudgetSpent = budgets.reduce((sum, budget) => sum + (expensesByCategory[budget.category] || 0), 0);
   const budgetsRing = buildBudgetDonutGradient(budgets, totalBudgetLimit);
-  const firstBudgetColor = firstBudget ? resolveThemeColor(firstBudget.theme) : '#9d507d';
+  const budgetsLegendHtml = budgets.length
+    ? budgets
+        .map(budget => {
+          const spent = expensesByCategory[budget.category] || 0;
+          const color = resolveThemeColor(budget.theme);
+          return `
+            <div class="border-l-4 pl-2" style="border-color:${color};">
+              <p class="text-sm text-slate-500">${budget.category}</p>
+              <p class="font-semibold text-[#1f2131]">${utils.formatCurrency(spent)}</p>
+            </div>
+          `;
+        })
+        .join('')
+    : '<div class="border-l-4 pl-2" style="border-color:#d6d9df;"><p class="text-sm text-slate-500">No Budget</p><p class="font-semibold text-[#1f2131]">$0.00</p></div>';
 
   const html = `
     <div class="space-y-4">
@@ -129,10 +140,7 @@ export function renderOverviewPage(): void {
                 </div>
               </div>
               <div class="lg:pr-3">
-                <div class="border-l-4 pl-2" style="border-color:${firstBudgetColor};">
-                  <p class="text-sm text-slate-500">${firstBudget ? firstBudget.category : 'No Budget'}</p>
-                  <p class="font-semibold text-[#1f2131]">${utils.formatCurrency(budgetSpent)}</p>
-                </div>
+                <div class="space-y-3">${budgetsLegendHtml}</div>
               </div>
             </div>
           </section>

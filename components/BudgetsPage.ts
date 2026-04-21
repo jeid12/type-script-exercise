@@ -27,6 +27,18 @@ function getTheme(theme: string): ThemeStyle {
   return themeMap[key] || themeMap.magenta;
 }
 
+function normalizeCategory(value: string): string {
+  const normalized = value.trim().toLowerCase();
+  if (normalized === 'bill' || normalized === 'bills') {
+    return 'bill';
+  }
+  return normalized;
+}
+
+function isBudgetCategoryMatch(transactionCategory: string, budgetCategory: string): boolean {
+  return normalizeCategory(transactionCategory) === normalizeCategory(budgetCategory);
+}
+
 function buildBudgetDonutGradient(
   budgets: Array<{ maxSpend: number; theme: string }>,
   totalLimit: number
@@ -76,6 +88,7 @@ export function renderBudgetsPage(onAddClick: () => void): void {
 
   const budgets = storage.getBudgets();
   const expensesByCategory = storage.getExpensesByCategory();
+  const transactions = storage.getTransactions();
 
   const totalLimit = budgets.reduce((sum, item) => sum + item.maxSpend, 0);
   const totalSpent = budgets.reduce((sum, item) => sum + (expensesByCategory[item.category] || 0), 0);
@@ -120,6 +133,26 @@ export function renderBudgetsPage(onAddClick: () => void): void {
     const free = Math.max(0, budget.maxSpend - spent);
     const percent = Math.min(100, utils.calculatePercentage(spent, budget.maxSpend));
     const theme = getTheme(budget.theme);
+    const latestSpending = transactions
+      .filter(transaction => transaction.type === 'expense' && isBudgetCategoryMatch(transaction.category, budget.category))
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+      .slice(0, 3);
+
+    const latestSpendingHtml = latestSpending.length
+      ? latestSpending
+          .map(
+            transaction => `
+              <div class="flex items-center justify-between border-b border-[#e5dfdf] pb-3 last:border-b-0 last:pb-0">
+                <div>
+                  <p class="text-[22px] leading-none font-bold text-[#252733]">${transaction.recipient || transaction.description || transaction.category}</p>
+                  <p class="mt-1 text-[16px] leading-none text-[#8a8f98]">${utils.formatDateShort(transaction.date)}</p>
+                </div>
+                <p class="text-[22px] leading-none font-bold text-[#252733]">${utils.formatCurrency(transaction.amount)}</p>
+              </div>
+            `
+          )
+          .join('')
+      : '<p class="text-center text-[27px] leading-none text-[#8a8f98]">You haven\'t made any spendings yet.</p>';
 
     const summaryRow = dom.createElement('div', {
       className: 'flex items-center justify-between border-b border-[#ece7e7] pb-3',
@@ -163,9 +196,9 @@ export function renderBudgetsPage(onAddClick: () => void): void {
         <div class="rounded-xl bg-[#f6f2f2] p-4">
           <div class="mb-4 flex items-center justify-between">
             <h5 class="text-[35px] leading-none font-bold text-[#252733]">Latest Spending</h5>
-            <span class="text-[30px] leading-none text-[#6f7480]">See All <span class="ml-1">›</span></span>
+            <a href="/transactions" class="text-[30px] leading-none text-[#6f7480] hover:text-[#3f4756]">See All <span class="ml-1">›</span></a>
           </div>
-          <p class="text-center text-[27px] leading-none text-[#8a8f98]">You haven't made any spendings yet.</p>
+          <div class="space-y-3">${latestSpendingHtml}</div>
         </div>
       `,
     });
