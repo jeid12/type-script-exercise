@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { renderOverviewPage } from '@/components/OverviewPage';
+import { renderOverviewPage } from '../../../components/OverviewPage';
 
 export default function OverviewRoutePage() {
   useEffect(() => {

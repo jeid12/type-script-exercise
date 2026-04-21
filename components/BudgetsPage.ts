@@ -2,6 +2,45 @@ import * as dom from '@/lib/dom';
 import * as storage from '@/lib/storage';
 import * as utils from '@/lib/utils';
 
+type ThemeStyle = {
+  name: string;
+  color: string;
+};
+
+const themeMap: Record<string, ThemeStyle> = {
+  green: { name: 'Green', color: '#2f8f8c' },
+  grey: { name: 'Grey', color: '#6f6f73' },
+  cyan: { name: 'Cyan', color: '#79d2de' },
+  orange: { name: 'Orange', color: '#d2895a' },
+  purple: { name: 'Purple', color: '#8c74c7' },
+  red: { name: 'Red', color: '#d2524b' },
+  yellow: { name: 'Yellow', color: '#e9be74' },
+  navy: { name: 'Navy', color: '#585a70' },
+  turquoise: { name: 'Turquoise', color: '#89a9a8' },
+  brown: { name: 'Brown', color: '#8c6c56' },
+  magenta: { name: 'Magenta', color: '#9d507d' },
+  blue: { name: 'Blue', color: '#4f8fd8' },
+};
+
+function getTheme(theme: string): ThemeStyle {
+  const key = theme.trim().toLowerCase();
+  return themeMap[key] || themeMap.magenta;
+}
+
+function renderDonut(totalSpent: number, totalLimit: number): string {
+  const percentage = totalLimit > 0 ? Math.min(100, Math.round((totalSpent / totalLimit) * 100)) : 0;
+  const ring = `conic-gradient(#9d507d ${percentage}%, #ece7e7 ${percentage}% 100%)`;
+
+  return `
+    <div class="mx-auto mb-8 h-44 w-44 rounded-full flex items-center justify-center" style="background: ${ring};">
+      <div class="h-24 w-24 rounded-full bg-white flex flex-col items-center justify-center text-center">
+        <p class="text-[51px] leading-none font-bold text-[#1f2131]">$${Math.floor(totalSpent)}</p>
+        <p class="text-xs text-[#8a8f98]">of ${utils.formatCurrency(totalLimit)} limit</p>
+      </div>
+    </div>
+  `;
+}
+
 export function renderBudgetsPage(onAddClick: () => void): void {
   const page = dom.querySelector<HTMLDivElement>('#budgets-page')!;
   dom.clearChildren(page);
@@ -9,20 +48,26 @@ export function renderBudgetsPage(onAddClick: () => void): void {
   const budgets = storage.getBudgets();
   const expensesByCategory = storage.getExpensesByCategory();
 
+  const totalLimit = budgets.reduce((sum, item) => sum + item.maxSpend, 0);
+  const totalSpent = budgets.reduce((sum, item) => sum + (expensesByCategory[item.category] || 0), 0);
+
   const html = `
-    <div>
-      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-        <div>
-          <h3 class="text-2xl font-bold text-slate-900 dark:text-white">Budgets</h3>
-          <p class="text-slate-600 dark:text-slate-400 text-sm mt-1">Monitor your spending across categories</p>
-        </div>
-        <button id="add-budget-btn" class="w-full sm:w-auto bg-slate-900 dark:bg-slate-800 text-white px-6 py-3 rounded-lg hover:bg-slate-800 font-medium transition-colors">
-          + Add Budget
+    <div class="space-y-6">
+      <div class="flex justify-end">
+        <button id="add-budget-btn" class="rounded-xl bg-[#1d1d2b] px-6 py-3 text-white font-semibold hover:bg-[#2a2a3d]">
+          +Add New Budget
         </button>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="budgets-list">
-        ${budgets.length === 0 ? '<p class="col-span-full text-slate-500 dark:text-slate-400 text-center py-16">No budgets yet. Create one to start tracking!</p>' : ''}
+      <div class="grid grid-cols-1 xl:grid-cols-[360px_1fr] gap-4">
+        <section class="rounded-xl border border-[#ece7e7] bg-white p-6">
+          ${renderDonut(totalSpent, totalLimit || 1)}
+
+          <h3 class="text-[39px] leading-none font-bold text-[#252733] mb-6">Spending Summary</h3>
+          <div id="budgets-summary-list" class="space-y-4"></div>
+        </section>
+
+        <section class="space-y-4" id="budgets-details"></section>
       </div>
     </div>
   `;
@@ -32,82 +77,129 @@ export function renderBudgetsPage(onAddClick: () => void): void {
   const addBtn = dom.querySelector<HTMLButtonElement>('#add-budget-btn')!;
   dom.addEventListener(addBtn, 'click', onAddClick);
 
-  const budgetsList = dom.querySelector<HTMLDivElement>('#budgets-list')!;
-  if (budgets.length > 0) {
-    dom.clearChildren(budgetsList);
-    budgets.forEach(budget => {
-      const spent = expensesByCategory[budget.category] || 0;
-      const percentage = utils.calculatePercentage(spent, budget.maxSpend);
-      const isOverBudget = spent > budget.maxSpend;
+  const summaryList = dom.querySelector<HTMLDivElement>('#budgets-summary-list')!;
+  const detailsContainer = dom.querySelector<HTMLDivElement>('#budgets-details')!;
 
-      const card = dom.createElement('div', {
-        className: `bg-white dark:bg-slate-800 rounded-2xl p-8 shadow-sm border border-l-4 ${isOverBudget ? 'border-l-red-500 border-slate-200 dark:border-slate-700' : 'border-l-blue-500 border-slate-200 dark:border-slate-700'}`,
-        innerHTML: `
-          <div class="flex justify-between items-start mb-6">
-            <h4 class="text-xl font-bold text-slate-900 dark:text-white">${budget.category}</h4>
-            <span class="inline-block px-3 py-1 ${isOverBudget ? 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400' : 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400'} rounded-full text-xs font-semibold">
-              ${percentage}%
-            </span>
-          </div>
-          
-          <div class="space-y-4">
-            <div>
-              <div class="w-full bg-slate-200 dark:bg-slate-700 h-3 rounded-full overflow-hidden">
-                <div class="${isOverBudget ? 'bg-red-500' : 'bg-blue-500'} h-full rounded-full" style="width: ${Math.min(percentage, 100)}%"></div>
-              </div>
-            </div>
-            
-            <div class="grid grid-cols-2 gap-4 pt-4 border-t border-slate-200 dark:border-slate-700">
-              <div>
-                <p class="text-xs text-slate-600 dark:text-slate-400 font-medium mb-1">Spent</p>
-                <p class="text-lg font-bold text-slate-900 dark:text-white">${utils.formatCurrency(spent)}</p>
-              </div>
-              <div>
-                <p class="text-xs text-slate-600 dark:text-slate-400 font-medium mb-1">Budget</p>
-                <p class="text-lg font-bold text-slate-900 dark:text-white">${utils.formatCurrency(budget.maxSpend)}</p>
-              </div>
-            </div>
-
-            ${isOverBudget ? `<p class="text-xs text-red-600 dark:text-red-400 font-medium pt-2">⚠️ Over budget by ${utils.formatCurrency(spent - budget.maxSpend)}</p>` : ''}
-          </div>
-        `,
-      });
-
-      dom.appendChild(budgetsList, card);
-    });
+  if (budgets.length === 0) {
+    dom.setHTML(summaryList, '<p class="text-sm text-[#8a8f98]">No budget categories yet.</p>');
+    dom.setHTML(detailsContainer, '<div class="rounded-xl border border-[#ece7e7] bg-white p-10 text-center text-[#8a8f98]">No budgets yet. Add one to start tracking.</div>');
+    return;
   }
+
+  budgets.forEach(budget => {
+    const spent = expensesByCategory[budget.category] || 0;
+    const free = Math.max(0, budget.maxSpend - spent);
+    const percent = Math.min(100, utils.calculatePercentage(spent, budget.maxSpend));
+    const theme = getTheme(budget.theme);
+
+    const summaryRow = dom.createElement('div', {
+      className: 'flex items-center justify-between border-b border-[#ece7e7] pb-3',
+      innerHTML: `
+        <div class="flex items-center gap-2">
+          <span class="inline-block h-5 w-1 rounded" style="background:${theme.color}"></span>
+          <span class="text-[27px] leading-none text-[#6f7480]">${budget.category}</span>
+        </div>
+        <span class="text-[30px] leading-none font-bold text-[#2a2c37]">${utils.formatCurrency(spent)} <span class="text-[#8a8f98] font-medium">of ${utils.formatCurrency(budget.maxSpend)}</span></span>
+      `,
+    });
+
+    const card = dom.createElement('article', {
+      className: 'rounded-xl border border-[#ece7e7] bg-white p-6',
+      innerHTML: `
+        <div class="flex items-start justify-between mb-3">
+          <div class="flex items-center gap-3">
+            <span class="inline-block h-4 w-4 rounded-full" style="background:${theme.color}"></span>
+            <h4 class="text-[34px] leading-none font-bold text-[#252733]">${budget.category}</h4>
+          </div>
+          <button class="text-xl text-[#4f5664]">•••</button>
+        </div>
+
+        <p class="text-[30px] leading-none text-[#6f7480] mb-5">Maximum of ${budget.maxSpend.toFixed(2)}</p>
+
+        <div class="h-6 rounded-md bg-[#f3efef] overflow-hidden mb-4">
+          <div class="h-full" style="width:${percent}%; background:${theme.color};"></div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4 border-t border-[#ece7e7] pt-4 mb-4">
+          <div class="border-l-4 pl-3" style="border-color:${theme.color};">
+            <p class="text-[25px] leading-none text-[#8a8f98]">Spent</p>
+            <p class="text-[39px] leading-none font-bold text-[#252733]">${utils.formatCurrency(spent)}</p>
+          </div>
+          <div class="border-l-4 border-[#ece7e7] pl-3">
+            <p class="text-[25px] leading-none text-[#8a8f98]">Free</p>
+            <p class="text-[39px] leading-none font-bold text-[#252733]">${utils.formatCurrency(free)}</p>
+          </div>
+        </div>
+
+        <div class="rounded-xl bg-[#f6f2f2] p-4">
+          <div class="mb-4 flex items-center justify-between">
+            <h5 class="text-[35px] leading-none font-bold text-[#252733]">Latest Spending</h5>
+            <span class="text-[30px] leading-none text-[#6f7480]">See All <span class="ml-1">›</span></span>
+          </div>
+          <p class="text-center text-[27px] leading-none text-[#8a8f98]">You haven't made any spendings yet.</p>
+        </div>
+      `,
+    });
+
+    dom.appendChild(summaryList, summaryRow);
+    dom.appendChild(detailsContainer, card);
+  });
 }
 
 export function showAddBudgetForm(onAdd: (category: string, maxSpend: number, theme: string) => void): void {
   const overlay = dom.createElement('div', {
-    className: 'fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4',
+    className: 'fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4',
     innerHTML: `
-      <div class="bg-white dark:bg-slate-800 rounded-2xl p-8 w-full max-w-md shadow-2xl">
-        <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-6">Add Budget</h3>
-        <form id="budget-form" class="space-y-5">
+      <div class="w-full max-w-[610px] rounded-xl bg-white p-6 shadow-2xl">
+        <div class="mb-4 flex items-center justify-between">
+          <h3 class="text-4xl leading-none font-bold text-[#1f2131]">Add New Budget</h3>
+          <button id="close-budget-modal" class="text-2xl text-[#777b86] hover:text-[#1f2131]">×</button>
+        </div>
+
+        <p class="mb-6 text-sm text-[#7f8ba0]">Choose a category to set a spending budget. These categories can help you monitor spending.</p>
+
+        <form id="budget-form" class="space-y-4">
           <div>
-            <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Category</label>
-            <input type="text" name="category" placeholder="e.g., Groceries" class="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-blue-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-white" required>
-          </div>
-          <div>
-            <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Maximum Spend</label>
-            <input type="number" name="maxSpend" placeholder="0.00" step="0.01" min="0" class="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-blue-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-white" required>
-          </div>
-          <div>
-            <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Theme Color</label>
-            <select name="theme" class="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-blue-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-white" required>
-              <option value="">Select a color</option>
-              <option value="green">Green</option>
-              <option value="blue">Blue</option>
-              <option value="red">Red</option>
-              <option value="orange">Orange</option>
-              <option value="purple">Purple</option>
+            <label class="mb-2 block text-sm font-semibold text-[#6e7280]">Category</label>
+            <select name="category" class="h-12 w-full rounded-lg border border-[#cfd4dc] px-4 text-[25px] leading-none text-[#1f2131] focus:outline-none" required>
+              <option value="">Select a category</option>
+              <option value="Bills">Bills</option>
+              <option value="Shopping">Shopping</option>
+              <option value="Food">Food</option>
+              <option value="Transport">Transport</option>
+              <option value="Entertainment">Entertainment</option>
+              <option value="Health">Health</option>
+              <option value="Education">Education</option>
+              <option value="Other">Other</option>
             </select>
           </div>
-          <div class="flex gap-3 pt-6">
-            <button type="submit" class="flex-1 bg-slate-900 text-white py-2 rounded-lg hover:bg-slate-800 font-semibold transition-colors">Add</button>
-            <button type="button" id="cancel-budget" class="flex-1 bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-white py-2 rounded-lg hover:bg-slate-300 dark:hover:bg-slate-600 font-semibold transition-colors">Cancel</button>
+
+          <div>
+            <label class="mb-2 block text-sm font-semibold text-[#6e7280]">Maximum Spend</label>
+            <input name="maxSpend" type="number" step="0.01" min="0" placeholder="e.g. $2000" class="h-12 w-full rounded-lg border border-[#cfd4dc] px-4 text-[25px] leading-none text-[#1f2131] focus:outline-none" required>
           </div>
+
+          <div>
+            <label class="mb-2 block text-sm font-semibold text-[#6e7280]">Theme</label>
+            <select name="theme" class="h-12 w-full rounded-lg border border-[#cfd4dc] px-4 text-[25px] leading-none text-[#1f2131] focus:outline-none" required>
+              <option value="">Select a theme</option>
+              <option value="green">Green</option>
+              <option value="grey">Grey</option>
+              <option value="cyan">Cyan</option>
+              <option value="orange">Orange</option>
+              <option value="purple">Purple</option>
+              <option value="red">Red</option>
+              <option value="yellow">Yellow</option>
+              <option value="navy">Navy</option>
+              <option value="turquoise">Turquoise</option>
+              <option value="brown">Brown</option>
+              <option value="magenta">Magenta</option>
+            </select>
+          </div>
+
+          <button type="submit" class="mt-2 h-12 w-full rounded-lg bg-[#1d1d2b] text-lg font-semibold text-white hover:bg-[#2a2a3d]">
+            Submit
+          </button>
         </form>
       </div>
     `,
@@ -116,16 +208,16 @@ export function showAddBudgetForm(onAdd: (category: string, maxSpend: number, th
   dom.appendChild(document.body, overlay);
 
   const form = dom.querySelector<HTMLFormElement>('#budget-form')!;
-  const cancelBtn = dom.querySelector<HTMLButtonElement>('#cancel-budget')!;
+  const closeButton = dom.querySelector<HTMLButtonElement>('#close-budget-modal')!;
 
-  dom.addEventListener(form, 'submit', (e: Event) => {
-    e.preventDefault();
+  dom.addEventListener(form, 'submit', (event: Event) => {
+    event.preventDefault();
     const values = dom.getFormValues(form);
     onAdd(values.category, parseFloat(values.maxSpend), values.theme);
     dom.removeChild(document.body, overlay);
   });
 
-  dom.addEventListener(cancelBtn, 'click', () => {
+  dom.addEventListener(closeButton, 'click', () => {
     dom.removeChild(document.body, overlay);
   });
 }
